@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <!--
-Copyright (c) 2017 Peter Hanecak <hanecak@opendata.sk>
+Copyright (c) 2020 Peter Hanecak <hanecak@opendata.sk>
 
 based on https://plot.ly/javascript/getting-started/
 -->
 <html>
 <head>
   <meta charset="utf-8"></head>
-  <script src="https://cdn.rawgit.com/hanecak/viz-data_catalog_stats-dataset_count/master/plotly-latest.min.js"></script>
+  <script src="https://cdn.rawgit.com/hanecak/viz-covid_19-sk/master/plotly-latest.min.js"></script>
 </head>
 <body>
 
-<div id="data-catalog-viz" style="width:900px; height:750px;"></div>
+<div id="covid19-sk" style="width:900px; height:750px;"></div>
 
 <script>
 var selectorOptions = {
@@ -35,51 +35,49 @@ var selectorOptions = {
   }],
 };
 
-Plotly.d3.csv('https://hanecak.github.io/data_data-catalog-stats/data-catalog-stats-all-dataset_count.csv', function(err, rows) {
-  var catalogs = [];
+Plotly.d3.dsv(";")("https://mirror.hany.sk/data/korona.gov.sk-csv-v1/korona.gov.sk.csv", function(err, rows) {
+  var metrics = [];
   var data = [];
   var layout = {
-    title: 'Data Catalog Stats - Dataset Count',
+    title: 'Covid-19 - Slovensko',
     xaxis: {
-      tickformat: '%Y/%m',
+      tickformat: '%d.%m.%Y',
       rangeselector: selectorOptions,
       rangeslider: {}
     },
-    yaxis: {
-      title: 'Number of datasets'
-    }
+    yaxis: {}
   };
   
-  for (catalog in rows[0])
-    if (catalog != "date") {
-      catalogs.push(catalog);
+  for (metric in rows[0])
+    if (metric != "Datum") {
+      metrics.push(metric);
       trace = {
         x:[],
         y:[],
         mode: 'lines',
-        name: catalog,
+        name: metric,
         connectgaps: true
       };
       data.push(trace);
     }
   
   for (var i = 0; i < rows.length; i++) {
-    for (var j = 0; j < catalogs.length; j++) {
-      date = rows[i]['date'];
-      data[j].x.push(date.substring(0, 4)
-        + '-' + date.substring(4, 6)
-        + '-' + date.substring(6));
-      value = rows[i][catalogs[j]];
+    for (var j = 0; j < metrics.length; j++) {
+      date = rows[i]['Datum'].split('-');
+      data[j].x.push(date[2] + '-' + date[1] + '-' + date[0]);
+      value = rows[i][metrics[j]];
       data[j].y.push((value >= 0) ? value : null);
     }
   }
 
-  Plotly.plot('data-catalog-viz', data, layout, {showLink: false});
+  Plotly.plot('covid19-sk', data, layout, {showLink: false});
 });
 </script>
 
-<p>Source code: <a href="https://github.com/hanecak/viz-data_catalog_stats-dataset_count">https://github.com/hanecak/viz-data_catalog_stats-dataset_count</a><br/>
-Data: <a href="https://github.com/hanecak/data_data-catalog-stats">https://github.com/hanecak/data_data-catalog-stats</a></p>
+<p>Source code: <a href="https://github.com/hanecak/viz-covid_19-sk">https://github.com/hanecak/viz-covid_19-sk</a><br/>
+Data: <a href="https://mirror.hany.sk/data/korona.gov.sk-csv-v1/korona.gov.sk.csv">https://mirror.hany.sk/data/korona.gov.sk-csv-v1/korona.gov.sk.csv</a>
+(copy of <a href="https://mapa.covid.chat/export/csv">https://mapa.covid.chat/export/csv</a>
+from <a href="https://korona.gov.sk/koronavirus-na-slovensku-v-cislach/">https://korona.gov.sk/koronavirus-na-slovensku-v-cislach/</a>)</p>
 
 </body>
 </html>
